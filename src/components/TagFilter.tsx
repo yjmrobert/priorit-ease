@@ -7,10 +7,23 @@ interface Props {
 
 export function TagFilter({ allTags, selected, onToggle, onClear }: Props) {
   if (allTags.length === 0) return null;
+  const activeCount = selected.size;
   return (
     <div className="tag-filter">
-      <span className="tag-filter__label">Filter by tag:</span>
-      <ul className="tag-filter__list">
+      <div className="tag-filter__header">
+        <span className="tag-filter__label">
+          Filter
+          {activeCount > 0 && (
+            <span className="tag-filter__count">{activeCount}</span>
+          )}
+        </span>
+        {activeCount > 0 && (
+          <button type="button" className="tag-filter__clear" onClick={onClear}>
+            Clear
+          </button>
+        )}
+      </div>
+      <ul className="tag-filter__list" role="list">
         {allTags.map((tag) => {
           const on = selected.has(tag);
           return (
@@ -27,11 +40,6 @@ export function TagFilter({ allTags, selected, onToggle, onClear }: Props) {
           );
         })}
       </ul>
-      {selected.size > 0 && (
-        <button type="button" className="tag-filter__clear" onClick={onClear}>
-          clear
-        </button>
-      )}
     </div>
   );
 }
