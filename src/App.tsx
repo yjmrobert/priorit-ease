@@ -1,15 +1,44 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { TodoForm } from './components/TodoForm';
 import { QuadrantSection } from './components/QuadrantSection';
 import { TagFilter } from './components/TagFilter';
 import { Toolbar } from './components/Toolbar';
+import { NotificationSettings } from './components/NotificationSettings';
 import { groupByQuadrant, QUADRANT_ORDER } from './lib/quadrant';
 import { useTodos } from './hooks/useTodos';
+import { useInstallPrompt } from './hooks/useInstallPrompt';
+import { loadSettings, saveSettings, type AppSettings } from './lib/settings';
+import { syncAll } from './lib/notifications';
 
 export default function App() {
   const { todos, addTodo, updateTodo, toggleCompleted, deleteTodo, clearCompleted } = useTodos();
   const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set());
   const [showCompleted, setShowCompleted] = useState(false);
+  const [settings, setSettings] = useState<AppSettings>(() => loadSettings());
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [isOffline, setIsOffline] = useState(
+    typeof navigator !== 'undefined' ? !navigator.onLine : false,
+  );
+  const { canInstall, promptInstall } = useInstallPrompt();
+
+  useEffect(() => {
+    saveSettings(settings);
+  }, [settings]);
+
+  useEffect(() => {
+    void syncAll(settings, todos);
+  }, [settings, todos]);
+
+  useEffect(() => {
+    function on() { setIsOffline(false); }
+    function off() { setIsOffline(true); }
+    window.addEventListener('online', on);
+    window.addEventListener('offline', off);
+    return () => {
+      window.removeEventListener('online', on);
+      window.removeEventListener('offline', off);
+    };
+  }, []);
 
   const allTags = useMemo(() => {
     const set = new Set<string>();
@@ -63,7 +92,19 @@ export default function App() {
           onToggleShowCompleted={setShowCompleted}
           completedCount={completedCount}
           onClearCompleted={clearCompleted}
+          canInstall={canInstall}
+          onInstall={() => { void promptInstall(); }}
+          isOffline={isOffline}
+          onOpenSettings={() => setSettingsOpen(true)}
         />
+
+        {settingsOpen && (
+          <NotificationSettings
+            settings={settings}
+            onChange={setSettings}
+            onClose={() => setSettingsOpen(false)}
+          />
+        )}
 
         <div className="quadrants">
           {QUADRANT_ORDER.map((q) => (

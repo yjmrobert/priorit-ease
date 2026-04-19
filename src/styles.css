@@ -179,12 +179,56 @@ input[type='text'] {
     grid-template-areas:
       'title title'
       'tags picker'
+      'due due'
       'submit submit';
   }
   .todo-form__title { grid-area: title; }
   .todo-form__tags { grid-area: tags; }
   .todo-form__picker { grid-area: picker; }
+  .todo-form__due { grid-area: due; }
   .todo-form__submit { grid-area: submit; justify-self: end; min-width: 160px; }
+}
+
+.todo-form__due {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.todo-form__due-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.todo-form__due-input,
+.todo-form__lead {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 9px 10px;
+  background: var(--surface);
+  color: inherit;
+  font: inherit;
+  min-height: 40px;
+}
+
+.todo-form__due-input {
+  flex: 1 1 180px;
+}
+
+.todo-form__lead {
+  flex: 0 0 auto;
+}
+
+.todo-form__due-input:focus,
+.todo-form__lead:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.todo-form__lead:disabled {
+  opacity: 0.55;
 }
 
 .todo-form__title,
@@ -420,6 +464,182 @@ input[type='text'] {
   background: var(--q1-soft);
 }
 
+.toolbar__spacer {
+  flex: 1 1 auto;
+}
+
+.toolbar__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  color: var(--text-muted);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+
+.toolbar__status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--q3);
+  box-shadow: 0 0 0 3px var(--q3-soft);
+}
+
+.toolbar__icon-btn {
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
+  padding: 0;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+}
+
+.toolbar__icon-btn:hover {
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+
+.toolbar__install {
+  background: var(--accent);
+  color: var(--accent-text);
+  border: 0;
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 13px;
+  min-height: 34px;
+}
+
+.toolbar__install:hover {
+  filter: brightness(1.05);
+}
+
+/* ---------- Notification settings panel ---------- */
+
+.settings {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-2);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.settings__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.settings__title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  flex: 1 1 auto;
+}
+
+.settings__close {
+  border: 0;
+  background: transparent;
+  color: var(--text-soft);
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.settings__close:hover {
+  background: var(--surface-3);
+  color: var(--text);
+}
+
+.settings__row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.settings__row input[type='checkbox'] {
+  margin-top: 3px;
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+}
+
+.settings__row--inline {
+  align-items: center;
+  gap: 12px;
+}
+
+.settings__row-label {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.settings__row-blurb {
+  font-size: 12px;
+  color: var(--text-soft);
+  line-height: 1.35;
+}
+
+.settings__group {
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--surface-2);
+}
+
+.settings__group[disabled] {
+  opacity: 0.6;
+}
+
+.settings__group legend {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-soft);
+  padding: 0 4px;
+}
+
+.settings__row input[type='time'] {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xs);
+  padding: 6px 8px;
+  background: var(--surface);
+  font: inherit;
+  color: inherit;
+}
+
+.settings__note {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-soft);
+  line-height: 1.4;
+}
+
+.settings__note--warn {
+  color: var(--q3);
+}
+
 /* ---------- Quadrants (2x2 on desktop, stacked on mobile) ---------- */
 
 .quadrants {
@@ -562,6 +782,59 @@ input[type='text'] {
 
 .todo-item--done .todo-item__title {
   text-decoration: line-through;
+}
+
+.todo-item--overdue:not(.todo-item--done) {
+  background: linear-gradient(to right, var(--q1-soft), transparent 60%);
+}
+
+.todo-item__due {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.2;
+}
+
+.todo-item__due.is-overdue {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.todo-item__edit-due {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.todo-item__edit-duedate,
+.todo-item__edit-lead {
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-xs);
+  padding: 5px 7px;
+  background: var(--surface);
+  font: inherit;
+  color: inherit;
+  font-size: 13px;
+}
+
+.todo-item__edit-lead:disabled {
+  opacity: 0.55;
+}
+
+.todo-item__edit-clear {
+  border: 0;
+  background: transparent;
+  color: var(--accent);
+  font-size: 12px;
+  padding: 4px 6px;
+  border-radius: var(--radius-xs);
+}
+
+.todo-item__edit-clear:hover {
+  background: var(--accent-soft);
 }
 
 /* Custom checkbox with 44x44 touch target */
