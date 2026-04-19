@@ -8,6 +8,8 @@ export interface NewTodoInput {
   urgent: boolean;
   tags: string[];
   notes?: string;
+  dueAt?: number;
+  reminderLeadMinutes?: number;
 }
 
 export interface UseTodos {
@@ -37,6 +39,8 @@ export function useTodos(): UseTodos {
         tags: normalizeTags(input.tags),
         completed: false,
         createdAt: Date.now(),
+        dueAt: input.dueAt,
+        reminderLeadMinutes: input.reminderLeadMinutes,
       },
       ...prev,
     ]);

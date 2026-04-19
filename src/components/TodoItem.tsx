@@ -1,5 +1,6 @@
 import { useState, type KeyboardEvent } from 'react';
 import type { Todo } from '../types';
+import { formatDue, fromDatetimeLocalValue, isOverdue, toDatetimeLocalValue } from '../lib/due';
 
 interface Props {
   todo: Todo;
@@ -13,6 +14,12 @@ export function TodoItem({ todo, onToggleCompleted, onUpdate, onDelete, onTagCli
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(todo.title);
   const [tagDraft, setTagDraft] = useState(todo.tags.join(', '));
+  const [dueDraft, setDueDraft] = useState(
+    todo.dueAt ? toDatetimeLocalValue(todo.dueAt) : '',
+  );
+  const [leadDraft, setLeadDraft] = useState<number>(todo.reminderLeadMinutes ?? 0);
+
+  const overdue = isOverdue(todo);
 
   function commitEdit() {
     const trimmed = draft.trim();
@@ -20,8 +27,16 @@ export function TodoItem({ todo, onToggleCompleted, onUpdate, onDelete, onTagCli
     if (!trimmed) {
       setDraft(todo.title);
       setTagDraft(todo.tags.join(', '));
+      setDueDraft(todo.dueAt ? toDatetimeLocalValue(todo.dueAt) : '');
+      setLeadDraft(todo.reminderLeadMinutes ?? 0);
     } else {
-      onUpdate(todo.id, { title: trimmed, tags: nextTags });
+      const nextDue = fromDatetimeLocalValue(dueDraft);
+      onUpdate(todo.id, {
+        title: trimmed,
+        tags: nextTags,
+        dueAt: nextDue ?? undefined,
+        reminderLeadMinutes: nextDue !== null ? leadDraft : undefined,
+      });
     }
     setEditing(false);
   }
@@ -31,12 +46,16 @@ export function TodoItem({ todo, onToggleCompleted, onUpdate, onDelete, onTagCli
     if (e.key === 'Escape') {
       setDraft(todo.title);
       setTagDraft(todo.tags.join(', '));
+      setDueDraft(todo.dueAt ? toDatetimeLocalValue(todo.dueAt) : '');
+      setLeadDraft(todo.reminderLeadMinutes ?? 0);
       setEditing(false);
     }
   }
 
   return (
-    <li className={`todo-item${todo.completed ? ' todo-item--done' : ''}`}>
+    <li
+      className={`todo-item${todo.completed ? ' todo-item--done' : ''}${overdue ? ' todo-item--overdue' : ''}`}
+    >
       <label className="todo-item__check-wrap" aria-label="Mark done">
         <input
           type="checkbox"
@@ -70,16 +89,65 @@ export function TodoItem({ todo, onToggleCompleted, onUpdate, onDelete, onTagCli
               onBlur={commitEdit}
               aria-label="Edit tags"
             />
+            <div className="todo-item__edit-due">
+              <input
+                className="todo-item__edit-duedate"
+                type="datetime-local"
+                value={dueDraft}
+                onChange={(e) => setDueDraft(e.target.value)}
+                onBlur={commitEdit}
+                aria-label="Edit due date"
+              />
+              <select
+                className="todo-item__edit-lead"
+                value={leadDraft}
+                onChange={(e) => setLeadDraft(Number(e.target.value))}
+                onBlur={commitEdit}
+                disabled={!dueDraft}
+                aria-label="Remind before due"
+              >
+                <option value={0}>At due</option>
+                <option value={5}>5m before</option>
+                <option value={15}>15m before</option>
+                <option value={60}>1h before</option>
+                <option value={24 * 60}>1d before</option>
+              </select>
+              {dueDraft && (
+                <button
+                  type="button"
+                  className="todo-item__edit-clear"
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    setDueDraft('');
+                  }}
+                >
+                  Clear
+                </button>
+              )}
+            </div>
           </div>
         ) : (
-          <button
-            type="button"
-            className="todo-item__title"
-            onClick={() => setEditing(true)}
-            title="Click to edit"
-          >
-            {todo.title}
-          </button>
+          <>
+            <button
+              type="button"
+              className="todo-item__title"
+              onClick={() => setEditing(true)}
+              title="Click to edit"
+            >
+              {todo.title}
+            </button>
+            {todo.dueAt !== undefined && (
+              <div className={`todo-item__due${overdue ? ' is-overdue' : ''}`}>
+                <svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true">
+                  <circle cx="12" cy="13" r="7.5" fill="none" stroke="currentColor" strokeWidth="1.6" />
+                  <path d="M12 9v4l2.5 1.5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+                </svg>
+                <span>
+                  {overdue ? 'Overdue' : 'Due'} {formatDue(todo.dueAt)}
+                </span>
+              </div>
+            )}
+          </>
         )}
 
         {todo.tags.length > 0 && !editing && (
